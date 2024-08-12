@@ -1,0 +1,49 @@
+﻿parameters:
+  - name: environment
+    type: string
+  - name: project_name
+    type: string
+  - name: service_connection
+    type: string
+  - name: working_directory
+    type: string
+
+stages:
+  - stage: Deploy${{ parameters.environment }}
+    displayName: "Terraform Plan + Apply + Deploy - ${{ parameters.environment }}"
+    
+    variables:
+      - group: vg-tf-logic-app-output-${{ parameters.environment }}
+      - group: vg-iac-tf-${{ parameters.environment }}
+    
+    
+    jobs:
+      - deployment: ApplyRelease
+        displayName: Release ${{ parameters.environment }}
+        environment: ${{ parameters.environment }}
+        workspace:
+          clean: all
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                # download sources which are published in build step
+                # as we want to be able to deploy a particular version, not the latest main
+                - checkout: none
+                - download: current
+                  artifact: drop
+                  displayName: Download artifacts
+
+                - task: AzureFunctionApp@1
+                  inputs:
+                    azureSubscription: ${{ parameters.service_connection }}
+                    appType: 'functionApp'
+                    appName: '$(TF_OUT_REALTIME_FUNCTION_APP_NAME)'
+                    package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
+                    deploymentMethod: 'auto'
+
+                - task: PublishPipelineArtifact@1
+                  displayName: Publish Pipeline Artifact
+                  inputs:
+                    artifactName: terraformPlan-${{ parameters.environment }}
+                    targetPath: $(Build.ArtifactStagingDirectory)

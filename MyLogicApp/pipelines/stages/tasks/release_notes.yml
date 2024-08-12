@@ -1,0 +1,18 @@
+steps: # 'Steps' section is to be used inside 'job' section.
+  - task: XplatGenerateReleaseNotes@4
+    displayName: 'Generate Release Note File'
+    inputs:
+      outputfile: '$(Build.ArtifactStagingDirectory)/inline.md'
+      templateLocation: 'File'
+      templatefile: '$(Build.SourcesDirectory)/deployhelpers/release-handlebars-template.md'
+      stopOnRedeploy: true
+      dumpPayloadToConsole: true
+      dumpPayloadToFile: true
+      replaceFile: True
+      getParentsAndChildren: False
+      getAllParents: False
+      getIndirectPullRequests: False
+      stopOnError: False
+      considerPartiallySuccessfulReleases: False
+      checkForManuallyLinkedWI: False
+      wiqlFromTarget: 'WorkItems'

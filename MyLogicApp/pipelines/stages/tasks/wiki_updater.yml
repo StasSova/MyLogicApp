@@ -1,0 +1,19 @@
+parameters:
+  - name: environment
+    type: string
+
+steps:
+  - task: WikiUpdaterTask@2
+    displayName: "Update wiki for - ${{ parameters.environment }} environment"
+    inputs:
+      repo: 'dev.azure.com/CETIM/Projet%20Smart_Data%20Cetim-Dvigunity/_git/Projet-Smart_Data-Cetim-Dvigunity.wiki'
+      filename: 'Smart-Data/Release-Notes/Test/$(Build.BuildNumber).md'
+      replaceFile: True
+      dataIsFile: true
+      sourceFile: '$(System.DefaultWorkingDirectory)/inline.md'
+      message: 'Added new Release Notes'
+      gitname: 'Smartdata'
+      gitemail: 'noreply_smartdata@cetim.fr'
+      useAgentToken: true
+      localpath: '$(System.DefaultWorkingDirectory)/repo'
+          

@@ -1,0 +1,32 @@
+# specific path build
+trigger:
+  branches:
+    include:
+    - main
+
+pr: none
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  artifact_name: sources_directory
+  working_directory: $(Agent.BuildDirectory)/${{ variables.artifact_name }}
+  project_name: buzzbuzz
+
+stages:
+  - template: stages/build-stage.yml
+    
+  - template: stages/release-stage.yml
+    parameters:
+      project_name: ${{ variables.project_name }}
+      environment: dev
+      service_connection: 'terraform-tds-buzzbuzz-trf-spn'
+      working_directory: $(working_directory)
+
+  - template: stages/release-stage.yml
+    parameters:
+      project_name: ${{ variables.project_name }}
+      environment: prod
+      service_connection: 'terraform-tds-buzzbuzz-trf-spn'
+      working_directory: $(working_directory)
